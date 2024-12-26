@@ -1,0 +1,267 @@
+# ruta a tu instalación de oh my zsh
+export ZSH="$HOME/.oh-my-zsh"
+
+# nombre del tema a cargar. si se establece en "random", se cargará un tema aleatorio cada vez que inicies oh my zsh
+#ZSH_THEME="robbyrussell"
+
+# lista de temas para elegir al cargar aleatoriamente
+# ZSH_THEME_RANDOM_CANDIDATES=( "robbyrussell" "agnoster" )
+
+# descomentar para habilitar la finalización sensible a mayúsculas
+# CASE_SENSITIVE="true"
+
+# descomentar para habilitar la finalización insensible a guiones
+# HYPHEN_INSENSITIVE="true"
+
+# descomentar una de las siguientes líneas para cambiar el comportamiento de actualización automática
+# zstyle ':omz:update' mode disabled  # deshabilitar actualizaciones automáticas
+# zstyle ':omz:update' mode auto      # actualizar automáticamente sin preguntar
+# zstyle ':omz:update' mode reminder   # solo recordarme actualizar cuando sea necesario
+
+# descomentar para cambiar con qué frecuencia se actualiza automáticamente (en días)
+# zstyle ':omz:update' frequency 13
+
+# descomentar si pegar urls y otro texto está desordenado
+DISABLE_MAGIC_FUNCTIONS="true"
+
+# descomentar para deshabilitar colores en ls
+# DISABLE_LS_COLORS="true"
+
+# descomentar para deshabilitar el título automático del terminal
+DISABLE_AUTO_TITLE="true"
+
+# descomentar para habilitar la corrección automática de comandos
+ENABLE_CORRECTION="true"
+
+# descomentar para mostrar puntos rojos mientras espera la finalización
+# COMPLETION_WAITING_DOTS="true"
+
+# descomentar si deseas deshabilitar el marcado de archivos no rastreados bajo vcs como sucios
+# DISABLE_UNTRACKED_FILES_DIRTY="true"
+
+# descomentar si deseas cambiar el formato de tiempo de ejecución del comando mostrado en el historial
+# HIST_STAMPS="mm/dd/yyyy"
+
+# ¿quieres usar otra carpeta personalizada que no sea $ZSH/custom?
+# ZSH_CUSTOM=/ruta/a/nueva-carpeta-personalizada
+
+
+# Set up the correct key-map
+autoload -U select-word-style
+select-word-style bash
+
+# Fix the Java Problem
+export _JAVA_AWT_WM_NONREPARENTING=1
+
+# Enable Powerlevel10k instant prompt. Should stay at the top of ~/.zshrc.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
+
+
+# Set up the prompt
+
+autoload -Uz promptinit
+promptinit
+prompt adam1
+
+setopt histignorealldups sharehistory
+
+# Use emacs keybindings even if our EDITOR is set to vi
+bindkey -e
+
+# Keep 1000 lines of history within the shell and save it to ~/.zsh_history:
+HISTSIZE=1000
+SAVEHIST=1000
+HISTFILE=~/.zsh_history
+
+# Use modern completion system
+autoload -Uz compinit
+compinit
+
+zstyle ':completion:*' auto-description 'specify: %d'
+zstyle ':completion:*' completer _expand _complete _correct _approximate
+zstyle ':completion:*' format 'Completing %d'
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' menu select=2
+eval "$(dircolors -b)"
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+zstyle ':completion:*' list-colors ''
+zstyle ':completion:*' list-prompt %SAt %p: Hit TAB for more, or the character to insert%s
+zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
+zstyle ':completion:*' menu select=long
+zstyle ':completion:*' select-prompt %SScrolling active: current selection at %p%s
+zstyle ':completion:*' use-compctl false
+zstyle ':completion:*' verbose true
+
+
+# Manual aliases
+alias ll='lsd -lh --group-dirs=first'
+alias la='lsd -a --group-dirs=first'
+alias l='lsd --group-dirs=first'
+alias lla='lsd -lha --group-dirs=first'
+alias ls='lsd --group-dirs=first'
+alias lst="lsd --tree"
+alias bat='batcat'
+alias cat='bat'
+alias grun='grun.sh main.cpp'
+alias icat="kitty +kitten icat"
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+
+# Set 'man' colors
+function man() {
+    env \
+    LESS_TERMCAP_mb=$'\e[01;31m' \
+    LESS_TERMCAP_md=$'\e[01;31m' \
+    LESS_TERMCAP_me=$'\e[0m' \
+    LESS_TERMCAP_se=$'\e[0m' \
+    LESS_TERMCAP_so=$'\e[01;44;33m' \
+    LESS_TERMCAP_ue=$'\e[0m' \
+    LESS_TERMCAP_us=$'\e[01;32m' \
+    man "$@"
+}
+
+
+# Finalize Powerlevel10k instant prompt. Should stay at the bottom of ~/.zshrc.
+(( ! ${+functions[p10k-instant-prompt-finalize]} )) || p10k-instant-prompt-finalize
+source ~/powerlevel10k/powerlevel10k.zsh-theme
+
+
+# ----- plugins -----
+plugins=(
+    eza 
+    fzf 
+    ssh
+    thefuck  
+    zoxide 
+    tldr 
+    zsh-syntax-highlighting 
+    zsh-autosuggestions 
+    #you-should-use
+    #zsh-history-substring-search 
+
+)
+
+source $ZSH/oh-my-zsh.sh 
+
+# ---- FZF -----
+# Función mejorada para fzf con vista previa
+function fzf-lovely() {
+    if [ "$1" = "h" ]; then
+        fzf -m --reverse --preview-window down:20 --preview '
+            [[ $(file --mime {}) =~ binary ]] && 
+            echo "{} es un archivo binario" || 
+            (bat --style=numbers --color=always {} || 
+             highlight -O ansi -l {} || 
+             coderay {} || 
+             rougify {} || 
+             cat {}) 2> /dev/null | head -500'
+    else
+        fzf -m --preview '
+            [[ $(file --mime {}) =~ binary ]] && 
+            echo "{} es un archivo binario" || 
+            (bat --style=numbers --color=always {} || 
+             highlight -O ansi -l {} || 
+             coderay {} || 
+             rougify {} || 
+             cat {}) 2> /dev/null | head -500'
+    fi
+}
+
+# Advanced customization of fzf options via _fzf_comprun function
+# - The first argument to the function is the name of the command.
+# - You should make sure to pass the rest of the arguments to fzf.
+_fzf_comprun() {
+  local command=$1
+  shift
+
+  case "$command" in
+    cd)           fzf --preview 'eza --tree --color=always {} | head -200' "$@" ;;
+    export|unset) fzf --preview "eval 'echo \${}'"         "$@" ;;
+    ssh)          fzf --preview 'dig {}'                   "$@" ;;
+    *)            fzf --preview "$show_file_or_dir_preview" "$@" ;;
+  esac
+}
+
+# Vista previa para archivos o directorios
+show_file_or_dir_preview='if [ -d {} ]; then eza --tree --color=always {} | head -200; else bat -n --color=always --line-range :500 {}; fi'
+#export FZF_CTRL_T_OPTS="--preview '$show_file_or_dir_preview'"
+export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -200'"
+
+
+# Atajos de teclado para navegación
+bindkey "^[[1;3C" forward-word
+bindkey "^[[1;3D" backward-word
+bindkey "^[[1;5C" forward-word
+bindkey "^[[1;5D" backward-word
+
+# ----- fzf notes -----
+# ctrl+r  fuzzy find through your command history
+# ctrl+t  fuzzy find through the current directory
+# Enter 	Select the item
+# Tab 	Mark a result
+# Shift-Tab 	Unmark a result
+# cd **Tab 	Open up fzf to find directory
+# export **Tab 	Look for env variable to export
+# unset **Tab 	Look for env variable to unset
+# unalias **Tab 	Look for alias to unalias
+# ssh **Tab 	Look for recently visited host names
+# kill -9 **Tab 	Look for process name to kill to get pid
+# any command (like nvim or code) + **Tab 	Look for files & directories to complete command
+
+# --- Configuración del tema de fzf ---
+#dracula theme
+#export FZF_DEFAULT_OPTS='--color=fg:#f8f8f2,bg:#282a36,hl:#bd93f9 --#color=fg+:#f8f8f2,bg+:#44475a,hl+:#bd93f9 --color=info:#ffb86c,prompt:#50fa7b,pointer:#ff79c6 --#color=marker:#ff79c6,spinner:#ffb86c,header:#6272a4'
+
+
+# ---- zsh-history-substring-search  -----
+#bindkey '^[[A' history-substring-search-up 
+#bindkey '^[[B' history-substring-search-down 
+
+# ---- you-should-use -----
+
+
+# ----- bat (mejor cat) -----
+export BAT_THEME=tokyonight_night 
+
+# ---- eza (mejor ls) -----
+alias ls="eza --icons=always" 
+
+# ---- thefuck -----
+eval $(thefuck --alias) 
+eval $(thefuck --alias fk) 
+
+# ---- zoxide (mejor cd) -----
+eval "$(zoxide init zsh)" 
+alias cd="z"
+
+# --- ssh ---
+eval "$(ssh-agent -s)" &> /dev/null
+
+# ---- tldr -----
+export TLDR_COLOR_NAME="cyan"
+export TLDR_COLOR_DESCRIPTION="white"
+export TLDR_COLOR_EXAMPLE="green"
+export TLDR_COLOR_COMMAND="red"
+export TLDR_COLOR_PARAMETER="white"
+export TLDR_LANGUAGE="en"
+export TLDR_CACHE_ENABLED=1
+export TLDR_CACHE_MAX_AGE=720
+export TLDR_PAGES_SOURCE_LOCATION="file:///home/jmlopez/Documents/Install/tldr/pages/"
+# export TLDR_DOWNLOAD_CACHE_LOCATION="https://tldr-pages.github.io/assets/tldr.zip"
+
+# --- python3 for just python ------
+alias python='python3'
+
+
+
+
+
+
+
+
