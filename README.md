@@ -1,2 +1,2 @@
 # dotfiles
-curretenly using linux mint
+curretenly using manjaro
