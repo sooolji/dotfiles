@@ -1,2 +1,2 @@
 # dotfiles
-curretenly using manjaro kde
+curretenly using manjaro
