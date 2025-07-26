@@ -1,4 +1,4 @@
 # dotfiles
-curretenly using arch (btw)
+currently using arch (btw)
 
 ![a show off part. 2](/img/ricing1.png)
