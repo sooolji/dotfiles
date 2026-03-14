@@ -1,4 +1,4 @@
 # dotfiles
 currently using ubuntu
 
-![show off](/img/ricing.png)
+![show off](ricing.png)
