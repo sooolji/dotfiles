@@ -1,4 +1,3 @@
 # dotfiles
-currently using ubuntu
+currently using debian + kde
 
-![show off](ricing.png)
